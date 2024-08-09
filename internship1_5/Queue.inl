@@ -22,18 +22,7 @@ bool Queue<DataType>::pop(DataType& data)
 	auto it = m_list.end();
 	--it;
 	data = *it;
+	m_list.remove(it);
 
-	return m_list.remove(it);
-}
-
-template<typename DataType>
-typename List<DataType>::ConstIterator Queue<DataType>::begin() const
-{
-	return m_list.begin();
-}
-
-template<typename DataType>
-typename List<DataType>::ConstIterator Queue<DataType>::end() const
-{
-	return m_list.end();
+	return true;
 }

@@ -19,19 +19,10 @@ bool Stack<DataType>::pop(DataType& data)
 	{
 		return false;
 	}
-	data = *m_list.begin();
 
-	return m_list.remove(m_list.begin());
-}
+	auto beginIt = m_list.begin();
 
-template<typename DataType>
-typename List<DataType>::ConstIterator Stack<DataType>::begin() const
-{
-	return m_list.begin();
-}
+	data = *beginIt;
 
-template<typename DataType>
-typename List<DataType>::ConstIterator Stack<DataType>::end() const
-{
-	return m_list.end();
+	return m_list.remove(beginIt);
 }

@@ -14,22 +14,16 @@ public:
 	size_t size()const;
 
 	///@brief 先頭に要素を追加します。
-	///@param data 追加するデータ
+	///@param [in] data 追加するデータ
 	///@return 追加に成功したらtrue 失敗したらfalseを返します。
 	bool push(const DataType& data);
 
 	///@brief 先頭の要素を取り出します
-	///@param data 取り出すデータを受け取る
+	///@param [out] data 取り出すデータを受け取る
 	///@return 取り出しに成功したらtrue 失敗したらfalseを返します。
+	///@detail スタックが空のときに呼ぶと失敗します。
+	///		   取り出しに失敗した場合dataの値は変わりません。
 	bool pop(DataType& data);
-
-	///@brief リストの先頭コンストイテレーターを返します
-	///@return 先頭コンストイテレーター
-	typename List<DataType>::ConstIterator begin()const;
-
-	///@brief リストの末尾コンストイテレーターを返します
-	///@return 末尾コンストイテレーター
-	typename List<DataType>::ConstIterator end()const;
 
 private:
 

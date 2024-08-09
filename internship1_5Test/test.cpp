@@ -1,429 +1,1301 @@
 #include "pch.h"
-#include"../internship1_5/Stack.h"
-#include"../internship1_5/Queue.h"
+#include"CheckValue.h"
+#include"../internship1_5/List.h"
+#include"../internship1_5/Grades.h"
 
-///@brief リストの内容が正解と等しいか確認します
-///@param ans 正解をvectorとして渡します
-///@param list 内容が正しいか調べたいデータ構造を渡します
-///@tparam ListType データ構造の型　(constの範囲for文に対応していること) 
-template<typename ListType>
-void CheckValue(const std::vector<int>& ans,const ListType& list)
+//リストのテスト
+
+//データ数の取得
+
+//リストが空である場合の戻り値
+TEST(TestListSize, Empty)
 {
-	EXPECT_TRUE(ans.size() == list.size());
+	List<Grades> list;
+	EXPECT_EQ(0, list.size());
+}
+
+//リスト末尾への挿入を行った際の戻り値
+TEST(TestListSize, Add)
+{
+	List<Grades> list;
+	list.add(Grades{ 0,"hoge" });
+	EXPECT_EQ(1, list.size());
+}
+
+//データの挿入を行った際の戻り値
+TEST(TestListSize, Insert)
+{
+	List<Grades> list;
+	list.insert(list.begin(), Grades{ 0,"hoge" });
+	EXPECT_EQ(1, list.size());
+}
+
+//データの挿入に失敗した際の戻り値
+TEST(TestListSize, FailInsert)
+{
+	List<Grades> list;
+	list.insert(List<Grades>::Iterator{}, Grades{ 0,"hoge" });
+	EXPECT_EQ(0, list.size());
+}
+
+//データの削除を行った際の戻り値
+TEST(TestListSize, Remove)
+{
+	List<Grades> list;
+	list.add(Grades{ 0,"hoge" });
+	list.remove(list.begin());
+	EXPECT_EQ(0, list.size());
+}
+
+//データの削除が失敗した際の戻り値
+TEST(TestListSize, FailRemove)
+{
+	List<Grades> list;
+	list.add(Grades{ 0,"hoge" });
+	list.remove(List<Grades>::Iterator{});
+	EXPECT_EQ(1, list.size());
+}
+
+//リストが空である場合に、データの削除を行った際の戻り値
+TEST(TestListSize, RemoveWhenEmpty)
+{
+	List<Grades> list;
+	list.remove(list.begin());
+	EXPECT_EQ(0, list.size());
+}
+
+//データの挿入
+
+//リストが空である場合に、挿入した際の挙動
+TEST(TestListInsert, Empty)
+{
+
+	//先頭イテレータで挿入
+	{
+		List<Grades> list;
+		EXPECT_TRUE(list.insert(list.begin(), Grades{ 0,"hoge" }));
+		CheckValue({ Grades{ 0,"hoge" } }, list);
+	}
+
+	//末尾イテレータで挿入
+	{
+		List<Grades> list;
+		EXPECT_TRUE(list.insert(list.end(), Grades{ 0,"hoge" }));
+		CheckValue({ Grades{ 0,"hoge" } }, list);
+	}
+}
+
+//リストに複数の要素がある場合に、先頭イテレータを渡して、挿入した際の挙動
+TEST(TestListInsert, InsertBegin)
+{
+	List<Grades> list;
+	list.add(Grades{ 0,"hoge" });
+	list.add(Grades{ 1,"fuga" });
+	EXPECT_TRUE(list.insert(list.begin(), Grades{ 2,"piyo" }));
+	CheckValue({ Grades{ 2,"piyo" },Grades{ 0,"hoge" },Grades{ 1,"fuga" } }, list);
+}
+
+//リストに複数の要素がある場合に、末尾イテレータを渡して、挿入した際の挙動
+TEST(TestListInsert, InsertEnd)
+{
+	List<Grades> list;
+	list.add(Grades{ 0,"hoge" });
+	list.add(Grades{ 1,"fuga" });
+	EXPECT_TRUE(list.insert(list.end(), Grades{ 2,"piyo" }));
+	CheckValue({ Grades{ 0,"hoge" },Grades{ 1,"fuga" },Grades{ 2,"piyo" } }, list);
+}
+
+//リストに複数の要素がある場合に、先頭でも末尾でもないイテレータを渡して挿入した際の挙動
+TEST(TestListInsert, InsertCenter)
+{
+
+	//先頭に追加
+	{
+		List<Grades> list;
+		list.add(Grades{ 0,"hoge" });
+		list.add(Grades{ 1,"fuga" });
+		EXPECT_TRUE(list.insert(list.begin(), Grades{ 2,"piyo" }));
+		CheckValue({ Grades{ 2,"piyo" },Grades{ 0,"hoge" },Grades{ 1,"fuga" } }, list);
+	}
+
+	//末尾に追加
+	{
+		List<Grades> list;
+		list.add(Grades{ 0,"hoge" });
+		list.add(Grades{ 1,"fuga" });
+		EXPECT_TRUE(list.insert(list.end(), Grades{ 2,"piyo" }));
+		CheckValue({ Grades{ 0,"hoge" },Grades{ 1,"fuga" },Grades{ 2,"piyo" } }, list);
+	}
+
+	//途中に追加
+	{
+		List<Grades> list;
+		list.add(Grades{ 0,"hoge" });
+		list.add(Grades{ 1,"fuga" });
+		auto iterator = list.begin();
+		++iterator;
+		EXPECT_TRUE(list.insert(iterator, Grades{ 2,"piyo" }));
+		CheckValue({ Grades{ 0,"hoge" }, Grades{ 2,"piyo" },Grades{ 1,"fuga" } }, list);
+	}
+}
+
+//ConstIteratorを指定して挿入を行った際の挙動
+TEST(TestListInsert, InsertConstIterator)
+{
+
+	//先頭に追加
+	{
+		List<Grades> list;
+		list.add(Grades{ 0,"hoge" });
+		list.add(Grades{ 1,"fuga" });
+		EXPECT_TRUE(list.insert(list.constBegin(), Grades{ 2,"piyo" }));
+		CheckValue({ Grades{ 2,"piyo" },Grades{ 0,"hoge" },Grades{ 1,"fuga" } }, list);
+	}
+
+	//末尾に追加
+	{
+		List<Grades> list;
+		list.add(Grades{ 0,"hoge" });
+		list.add(Grades{ 1,"fuga" });
+		EXPECT_TRUE(list.insert(list.constEnd(), Grades{ 2,"piyo" }));
+		CheckValue({ Grades{ 0,"hoge" },Grades{ 1,"fuga" },Grades{ 2,"piyo" } }, list);
+	}
+	//途中に追加
+	{
+		List<Grades> list;
+		list.add(Grades{ 0,"hoge" });
+		list.add(Grades{ 1,"fuga" });
+		auto iterator = list.constBegin();
+		++iterator;
+		EXPECT_TRUE(list.insert(iterator, Grades{ 2,"piyo" }));
+		CheckValue({ Grades{ 0,"hoge" }, Grades{ 2,"piyo" },Grades{ 1,"fuga" } }, list);
+	}
+}
+
+//不正なイテレータを渡して、挿入した場合の挙動
+TEST(TestListInsert, InsertInvalidIterator)
+{
+	//参照の無いイテレーター
+	{
+		List<Grades> list;
+		list.add(Grades{ 0,"hoge" });
+		list.add(Grades{ 1,"fuga" });
+		EXPECT_FALSE(list.insert(List<Grades>::Iterator{}, Grades{ 2,"piyo" }));
+		CheckValue({ Grades{ 0,"hoge" },Grades{ 1,"fuga" } }, list);
+	}
+
+	//別のリストのイテレーター
+	{
+		List<Grades> list;
+		list.add(Grades{ 0,"hoge" });
+		list.add(Grades{ 1,"fuga" });
+
+		List<Grades> otherList;
+		otherList.add(Grades{ 2,"piyo" });
+
+		EXPECT_FALSE(list.insert(otherList.begin(), Grades{ 2,"piyo" }));
+		CheckValue({ Grades{ 0,"hoge" },Grades{ 1,"fuga" } }, list);
+	}
+
+}
+
+
+//データの削除
+
+//リストが空である場合に、削除を行った際の挙動
+TEST(TestListRemove, Empty)
+{
+	//先頭イテレーターで削除
+	{
+		List<Grades> list;
+		EXPECT_FALSE(list.remove(list.begin()));
+		CheckValue({ }, list);
+	}
+
+	//末尾イテレーターで削除
+	{
+		List<Grades> list;
+		EXPECT_FALSE(list.remove(list.end()));
+		CheckValue({ }, list);
+	}
+}
+
+
+//リストに複数の要素がある場合に、先頭イテレータを渡して、削除した際の挙動
+TEST(TestListRemove, RemoveBegin)
+{
+	List<Grades> list;
+	list.add(Grades{ 0,"hoge" });
+	list.add(Grades{ 1,"fuga" });
+	EXPECT_TRUE(list.remove(list.begin()));
+	CheckValue({ Grades{ 1,"fuga" } }, list);
+}
+
+//リストに複数の要素がある場合に、末尾イテレータを渡して、削除した際の挙動
+TEST(TestListRemove, RemoveEnd)
+{
+	List<Grades> list;
+	list.add(Grades{ 0,"hoge" });
+	list.add(Grades{ 1,"fuga" });
+	EXPECT_FALSE(list.remove(list.end()));
+	CheckValue({ Grades{ 0,"hoge" },Grades{ 1,"fuga" } }, list);
+}
+
+//リストに複数の要素がある場合に、先頭でも末尾でもないイテレータを渡して削除した際の挙動
+TEST(TestListRemove, RemoveCenter)
+{
+	List<Grades> list;
+	list.add(Grades{ 0,"hoge" });
+	list.add(Grades{ 1,"fuga" });
+	list.add(Grades{ 2,"piyo" });
+
+	auto iterator = list.begin();
+	++iterator;
+	EXPECT_TRUE(list.remove(iterator));
+	CheckValue({ Grades{ 0,"hoge" }, Grades{ 2,"piyo" } }, list);
+}
+
+//ConstIteratorを指定して削除を行った際の挙動
+TEST(TestListRemove, RemoveConstIterator)
+{
+	List<Grades> list;
+	list.add(Grades{ 0,"hoge" });
+	list.add(Grades{ 1,"fuga" });
+	list.add(Grades{ 2,"piyo" });
+
+	auto iterator = list.constBegin();
+	++iterator;
+	EXPECT_TRUE(list.remove(iterator));
+	CheckValue({ Grades{ 0,"hoge" }, Grades{ 2,"piyo" } }, list);
+}
+
+//不正なイテレータを渡して、削除した場合の挙動
+TEST(TestListRemove, RemoveInvalidIterator)
+{
+	//参照の無いイテレーター
+	{
+		List<Grades> list;
+		list.add(Grades{ 0,"hoge" });
+		list.add(Grades{ 1,"fuga" });
+
+		EXPECT_FALSE(list.remove(List<Grades>::Iterator{}));
+		CheckValue({ Grades{ 0,"hoge" },Grades{ 1,"fuga" } }, list);
+	}
+
+	//他のリストのイテレーター
+	{
+		List<Grades> list;
+		list.add(Grades{ 0,"hoge" });
+		list.add(Grades{ 1,"fuga" });
+
+		List<Grades> otherList;
+		otherList.add(Grades{ 2,"piyo" });
+
+		EXPECT_FALSE(list.remove(otherList.begin()));
+		CheckValue({ Grades{ 0,"hoge" },Grades{ 1,"fuga" } }, list);
+	}
+}
+
+//先頭イテレータの取得
+
+//リストが空である場合に、呼び出した際の挙動
+TEST(TestListBegin, Empty)
+{
+	List<Grades> list;
+	EXPECT_EQ(list.begin(), list.end());
+}
+
+//リストに要素が一つある場合に、呼び出した際の挙動
+TEST(TestListBegin, OneElement)
+{
+	List<Grades> list;
+	list.add(Grades{ 0,"hoge" });
+	EXPECT_TRUE((*list.begin() == Grades{ 0,"hoge" }));
+}
+
+//リストに二つ以上の要素がある場合に、呼び出した際の挙動
+TEST(TestListBegin, MultipleElements)
+{
+	List<Grades> list;
+	list.add(Grades{ 0,"hoge" });
+	list.add(Grades{ 1,"fuga" });
+	EXPECT_TRUE((*list.begin() == Grades{ 0,"hoge" }));
+}
+
+//データの挿入を行った後に、呼び出した際の挙動
+TEST(TestListBegin, AfterInsert)
+{
+	//先頭に挿入
+	{
+		List<Grades> list;
+		list.add(Grades{ 0,"hoge" });
+		list.add(Grades{ 1,"fuga" });
+		list.insert(list.begin(), Grades{ 2,"piyo" });
+		EXPECT_TRUE((*list.begin() == Grades{ 2,"piyo" }));
+	}
+
+	//末尾に挿入
+	{
+		List<Grades> list;
+		list.add(Grades{ 0,"hoge" });
+		list.add(Grades{ 1,"fuga" });
+		list.insert(list.end(), Grades{ 2,"piyo" });
+		EXPECT_TRUE((*list.begin() == Grades{ 0,"hoge" }));
+	}
+
+	//途中に挿入
+	{
+		List<Grades> list;
+		list.add(Grades{ 0,"hoge" });
+		list.add(Grades{ 1,"fuga" });
+		auto iterator = list.begin();
+		++iterator;
+		list.insert(iterator, Grades{ 2,"piyo" });
+		EXPECT_TRUE((*list.begin() == Grades{ 0,"hoge" }));
+	}
+}
+
+//データの削除を行った後に、呼び出した際の挙動
+TEST(TestListBegin, AfterRemove)
+{
+	//先頭を削除
+	{
+		List<Grades> list;
+		list.add(Grades{ 0,"hoge" });
+		list.add(Grades{ 1,"fuga" });
+		list.add(Grades{ 2,"piyo" });
+		list.remove(list.begin());
+		EXPECT_TRUE((*list.begin() == Grades{ 1,"fuga" }));
+	}
+
+	//末尾を削除
+	{
+		List<Grades> list;
+		list.add(Grades{ 0,"hoge" });
+		list.add(Grades{ 1,"fuga" });
+		list.add(Grades{ 2,"piyo" });
+		auto it = list.end();
+		--it;
+		list.remove(it);
+		EXPECT_TRUE((*list.begin() == Grades{ 0,"hoge" }));
+	}
+
+	//途中を削除
+	{
+		List<Grades> list;
+		list.add(Grades{ 0,"hoge" });
+		list.add(Grades{ 1,"fuga" });
+		list.add(Grades{ 2,"piyo" });
+		auto iterator = list.begin();
+		++iterator;
+		list.remove(iterator);
+		EXPECT_TRUE((*list.begin() == Grades{ 0,"hoge" }));
+	}
+}
+
+
+//先頭コンストイテレータの取得
+
+//リストが空である場合に、呼び出した際の挙動
+TEST(TestListConstBegin, Empty)
+{
+	List<Grades> list;
+	EXPECT_EQ(list.constBegin(), list.constEnd());
+}
+
+//リストに要素が一つある場合に、呼び出した際の挙動
+TEST(TestListConstBegin, OneElement)
+{
+	List<Grades> list;
+	list.add(Grades{ 0,"hoge" });
+	EXPECT_TRUE((*list.constBegin() == Grades{ 0,"hoge" }));
+}
+
+//リストに二つ以上の要素がある場合に、呼び出した際の挙動
+TEST(TestListConstBegin, MultipleElements)
+{
+	List<Grades> list;
+	list.add(Grades{ 0,"hoge" });
+	list.add(Grades{ 1,"fuga" });
+	EXPECT_TRUE((*list.constBegin() == Grades{ 0,"hoge" }));
+}
+
+//データの挿入を行った後に、呼び出した際の挙動
+TEST(TestListConstBegin, AfterInsert)
+{
+	//先頭に挿入
+	{
+		List<Grades> list;
+		list.add(Grades{ 0,"hoge" });
+		list.add(Grades{ 1,"fuga" });
+		list.insert(list.begin(), Grades{ 2,"piyo" });
+		EXPECT_TRUE((*list.constBegin() == Grades{ 2,"piyo" }));
+	}
+
+	//末尾に挿入
+	{
+		List<Grades> list;
+		list.add(Grades{ 0,"hoge" });
+		list.add(Grades{ 1,"fuga" });
+		list.insert(list.end(), Grades{ 2,"piyo" });
+		EXPECT_TRUE((*list.constBegin() == Grades{ 0,"hoge" }));
+	}
+
+	//途中に挿入 
+	{
+		List<Grades> list;
+		list.add(Grades{ 0,"hoge" });
+		list.add(Grades{ 1,"fuga" });
+		auto iterator = list.begin();
+		++iterator;
+		list.insert(iterator, Grades{ 2,"piyo" });
+		EXPECT_TRUE((*list.constBegin() == Grades{ 0,"hoge" }));
+	}
+
+}
+
+
+//データの削除を行った後に、呼び出した際の挙動
+TEST(TestListConstBegin, AfterRemove)
+{
+	//先頭を削除
+	{
+		List<Grades> list;
+		list.add(Grades{ 0,"hoge" });
+		list.add(Grades{ 1,"fuga" });
+		list.add(Grades{ 2,"piyo" });
+		list.remove(list.begin());
+		EXPECT_TRUE((*list.constBegin() == Grades{ 1,"fuga" }));
+	}
+
+	//末尾を削除
+	{
+		List<Grades> list;
+		list.add(Grades{ 0,"hoge" });
+		list.add(Grades{ 1,"fuga" });
+		list.add(Grades{ 2,"piyo" });
+		auto it = list.end();
+		--it;
+		list.remove(it);
+		EXPECT_TRUE((*list.constBegin() == Grades{ 0,"hoge" }));
+	}
+
+	//途中を削除
+	{
+		List<Grades> list;
+		list.add(Grades{ 0,"hoge" });
+		list.add(Grades{ 1,"fuga" });
+		list.add(Grades{ 2,"piyo" });
+		auto iterator = list.begin();
+		++iterator;
+		list.remove(iterator);
+		EXPECT_TRUE((*list.constBegin() == Grades{ 0,"hoge" }));
+	}
+}
+
+
+//末尾イテレータの取得
+
+//リストが空である場合に、呼び出した際の挙動
+TEST(TestListEnd, Empty)
+{
+	List<Grades> list;
+	EXPECT_EQ(list.end(), list.begin());
+}
+
+//リストに要素が一つある場合に、呼び出した際の挙動
+TEST(TestListEnd, OneElement)
+{
+	List<Grades> list;
+	list.add(Grades{ 0,"hoge" });
+	auto it = list.end();
+	--it;
+	EXPECT_TRUE((*it == Grades{ 0,"hoge" }));
+}
+
+//リストに二つ以上の要素がある場合に、呼び出した際の挙動
+TEST(TestListEnd, MultipleElements)
+{
+	List<Grades> list;
+	list.add(Grades{ 0,"hoge" });
+	list.add(Grades{ 1,"fuga" });
+	auto it = list.end();
+	--it;
+	EXPECT_TRUE((*it == Grades{ 1,"fuga" }));
+}
+
+//データの挿入を行った後に、呼び出した際の挙動
+TEST(TestListEnd, AfterInsert)
+{
+	//先頭に挿入
+	{
+		List<Grades> list;
+		list.add(Grades{ 0,"hoge" });
+		list.add(Grades{ 1,"fuga" });
+		list.insert(list.begin(), Grades{ 2,"piyo" });
+		auto it = list.end();
+		--it;
+		EXPECT_TRUE((*it == Grades{ 1,"fuga" }));
+	}
+
+	//末尾に挿入
+	{
+		List<Grades> list;
+		list.add(Grades{ 0,"hoge" });
+		list.add(Grades{ 1,"fuga" });
+		list.insert(list.end(), Grades{ 2,"piyo" });
+		auto it = list.end();
+		--it;
+		EXPECT_TRUE((*it == Grades{ 2,"piyo" }));
+	}
+
+	//途中に挿入
+	{
+		List<Grades> list;
+		list.add(Grades{ 0,"hoge" });
+		list.add(Grades{ 1,"fuga" });
+		auto iterator = list.begin();
+		++iterator;
+		list.insert(iterator, Grades{ 2,"piyo" });
+		auto it = list.end();
+		--it;
+		EXPECT_TRUE((*it == Grades{ 1,"fuga" }));
+	}
+}
+
+
+//データの削除を行った後に、呼び出した際の挙動
+TEST(TestListEnd, AfterRemove)
+{
+
+	//先頭を削除
+	{
+		List<Grades> list;
+		list.add(Grades{ 0,"hoge" });
+		list.add(Grades{ 1,"fuga" });
+		list.add(Grades{ 2,"piyo" });
+		list.remove(list.begin());
+		auto it = list.end();
+		--it;
+		EXPECT_TRUE((*it == Grades{ 2,"piyo" }));
+	}
+
+	//末尾を削除
+	{
+		List<Grades> list;
+		list.add(Grades{ 0,"hoge" });
+		list.add(Grades{ 1,"fuga" });
+		list.add(Grades{ 2,"piyo" });
+		auto endIt = list.end();
+		--endIt;
+		list.remove(endIt);
+		auto it = list.end();
+		--it;
+		EXPECT_TRUE((*it == Grades{ 1,"fuga" }));
+	}
+
+	//途中を削除
+	{
+		List<Grades> list;
+		list.add(Grades{ 0,"hoge" });
+		list.add(Grades{ 1,"fuga" });
+		list.add(Grades{ 2,"piyo" });
+		auto iterator = list.begin();
+		++iterator;
+		list.remove(iterator);
+		auto it = list.end();
+		--it;
+		EXPECT_TRUE((*it == Grades{ 2,"piyo" }));
+	}
+}
+
+//末尾コンストイテレータの取得
+
+//リストが空である場合に、呼び出した際の挙動
+TEST(TestListConstEnd, Empty)
+{
+	List<Grades> list;
+	EXPECT_EQ(list.constEnd(), list.constBegin());
+}
+
+//リストに要素が一つある場合に、呼び出した際の挙動
+TEST(TestListConstEnd, OneElement)
+{
+	List<Grades> list;
+	list.add(Grades{ 0,"hoge" });
+	auto it = list.constEnd();
+	--it;
+	EXPECT_TRUE((*it == Grades{ 0,"hoge" }));
+}
+
+//リストに二つ以上の要素がある場合に、呼び出した際の挙動
+TEST(TestListConstEnd, MultipleElements)
+{
+	List<Grades> list;
+	list.add(Grades{ 0,"hoge" });
+	list.add(Grades{ 1,"fuga" });
+	auto it = list.constEnd();
+	--it;
+	EXPECT_TRUE((*it == Grades{ 1,"fuga" }));
+}
+
+//データの挿入を行った後に、呼び出した際の挙動
+TEST(TestListConstEnd, AfterInsert)
+{
+	//先頭に挿入
+	{
+		List<Grades> list;
+		list.add(Grades{ 0,"hoge" });
+		list.add(Grades{ 1,"fuga" });
+		list.insert(list.begin(), Grades{ 2,"piyo" });
+		auto it = list.constEnd();
+		--it;
+		EXPECT_TRUE((*it == Grades{ 1,"fuga" }));
+	}
+
+	//後方に挿入
+	{
+		List<Grades> list;
+		list.add(Grades{ 0,"hoge" });
+		list.add(Grades{ 1,"fuga" });
+		list.insert(list.end(), Grades{ 2,"piyo" });
+		auto it = list.constEnd();
+		--it;
+		EXPECT_TRUE((*it == Grades{ 2,"piyo" }));
+	}
+
+	//途中に挿入
+	{
+		List<Grades> list;
+		list.add(Grades{ 0,"hoge" });
+		list.add(Grades{ 1,"fuga" });
+		auto iterator = list.begin();
+		++iterator;
+		list.insert(iterator, Grades{ 2,"piyo" });
+		auto it = list.constEnd();
+		--it;
+		EXPECT_TRUE((*it == Grades{ 1,"fuga" }));
+	}
+}
+
+//データの削除を行った後に、呼び出した際の挙動
+TEST(TestListConstEnd, AfterRemove)
+{
+	//先頭を削除
+	{
+		List<Grades> list;
+		list.add(Grades{ 0,"hoge" });
+		list.add(Grades{ 1,"fuga" });
+		list.add(Grades{ 2,"piyo" });
+		list.remove(list.begin());
+		auto it = list.constEnd();
+		--it;
+		EXPECT_TRUE((*it == Grades{ 2,"piyo" }));
+	}
+
+	//末尾を削除
+	{
+		List<Grades> list;
+		list.add(Grades{ 0,"hoge" });
+		list.add(Grades{ 1,"fuga" });
+		list.add(Grades{ 2,"piyo" });
+		auto endIt = list.end();
+		--endIt;
+		list.remove(endIt);
+		auto it = list.constEnd();
+		--it;
+		EXPECT_TRUE((*it == Grades{ 1,"fuga" }));
+	}
+
+	//途中を削除
+	{
+		List<Grades> list;
+		list.add(Grades{ 0,"hoge" });
+		list.add(Grades{ 1,"fuga" });
+		list.add(Grades{ 2,"piyo" });
+		auto iterator = list.begin();
+		++iterator;
+		list.remove(iterator);
+		auto it = list.constEnd();
+		--it;
+		EXPECT_TRUE((*it == Grades{ 2,"piyo" }));
+	}
+}
+
+//イテレーターのテスト
+
+//イテレータの指す要素を取得する
+
+//リストの参照がない状態で呼び出した際の挙動
+TEST(TestIteratorGetElement, NoReferences)
+{
+#ifdef _DEBUG
+	List<Grades>::Iterator it;
+	EXPECT_DEATH((*it).score, ".*");
+#endif
+}
+
+//Iteratorから取得した要素に対して、値の代入が行えるかをチェック
+TEST(TestIteratorGetElement, AssignValue)
+{
+#ifdef _DEBUG
+	List<Grades> list;
+	list.add({ 0,"hoge" });
+
+	auto it = list.begin();
+	(*it) = Grades{ 1,"fuga" };
+
+	EXPECT_TRUE(((*it) == Grades{ 1,"fuga" }));
+#endif
+}
+
+//リストが空の際の、先頭イテレータに対して呼び出した際の挙動
+TEST(TestIteratorGetElement, BeginIteratorWhenEmpty)
+{
+#ifdef _DEBUG
+	List<Grades> list;
+	EXPECT_DEATH((*list.begin()).score, ".*");
+#endif
+}
+
+//末尾イテレータに対して呼び出した際の挙動
+TEST(TestIteratorGetElement, EndIterator)
+{
+#ifdef _DEBUG
+	List<Grades> list;
+	list.add(Grades{ 0,"hoge" });
+	list.add(Grades{ 1,"fuga" });
+	EXPECT_DEATH((*list.end()).score, ".*");
+#endif
+}
+
+
+//イテレータをリストの末尾に向かって一つ進める
+
+//リストの参照がない状態で呼び出した際の挙動
+TEST(TestIteratorIncrement, NoReferences)
+{
+#ifdef _DEBUG
+	List<Grades>::Iterator it;
+	EXPECT_DEATH(++it, ".*");
+#endif
+}
+
+//リストが空の際の、先頭イテレータに対して呼び出した際の挙動
+TEST(TestIteratorIncrement, BeginIteratorWhenEmpty)
+{
+#ifdef _DEBUG
+	List<Grades> list;
+	auto it = list.begin();
+	EXPECT_DEATH(++it, ".*");
+#endif
+}
+
+//末尾イテレータに対して呼び出した際の挙動
+TEST(TestIteratorIncrement, EndIterator)
+{
+#ifdef _DEBUG
+	List<Grades> list;
+	list.add(Grades{ 0,"hoge" });
+	list.add(Grades{ 1,"fuga" });
+	auto it = list.end();
+	EXPECT_DEATH(++it, ".*");
+#endif
+}
+
+
+//リストに二つ以上の要素がある場合に呼び出した際の挙動
+TEST(TestIteratorIncrement, MultipleElements)
+{
+	List<Grades> list;
+	list.add({ 0,"hoge" });
+	list.add({ 1,"fuga" });
+	list.add({ 2,"piyo" });
+
+	std::vector<Grades>ans{ Grades{ 0,"hoge" },Grades{ 1,"fuga" },Grades{ 2,"piyo" } };
 
 	size_t i = 0;
-	for (const auto& grades : list)
+	for (auto it = list.begin(); it != list.end(); ++it)
 	{
-
-		EXPECT_EQ(grades, ans[i]);
-
+		EXPECT_TRUE((*it == ans[i]));
 		++i;
 	}
 }
 
-
-
-//==================================== スタック構造 ====================================
-
-//=================================== データ数の取得 ===================================
-
-/**********************************************************************************//**
-	@brief		リストが空である場合のデータ数の取得テスト
-	@details	ID:スタック-0\n
-				データ数の取得機能のテストです。\n
-				リストが空である場合の戻り値を確認しています。\n
-				データ数が0であれば成功です。\n
-*//***********************************************************************************/
-
-TEST(TestStackSize, Empty)
+//前置インクリメントを行った際の挙動(++演算子オーバーロードで実装した場合)
+TEST(TestIteratorIncrement, PrefaceIncrement)
 {
-	Stack<int>stack;
-	EXPECT_EQ(0,stack.size());
+	List<Grades> list;
+	list.add({ 0,"hoge" });
+	list.add({ 1,"fuga" });
+
+	auto it = list.begin();
+	EXPECT_TRUE((*(++it) == Grades{ 1,"fuga" }));
+	EXPECT_TRUE((*it == Grades{ 1,"fuga" }));
 }
 
-/**********************************************************************************//**
-	@brief		要素をプッシュした後のデータ数の取得テスト
-	@details	ID:スタック-1\n
-				データ数の取得機能のテストです。\n
-				要素をプッシュした後の戻り値を確認しています。\n
-				データ数が1であれば成功です。\n
-*//***********************************************************************************/
-
-TEST(TestStackSize, AfterPush)
+////後置インクリメントを行った際の挙動( ++演算子オーバーロードで実装した場合 )
+TEST(TestIteratorIncrement, PostfixIncrement)
 {
-	Stack<int>stack;
-	ASSERT_TRUE(stack.push(0));
-	EXPECT_EQ(1, stack.size());
+	List<Grades> list;
+	list.add({ 0,"hoge" });
+	list.add({ 1,"fuga" });
+
+	auto it = list.begin();
+	EXPECT_TRUE((*(it++) == Grades{ 0,"hoge" }));
+	EXPECT_TRUE((*it == Grades{ 1,"fuga" }));
 }
 
-/**********************************************************************************//**
-	@brief		要素をポップした後のデータ数の取得テスト
-	@details	ID:スタック-2\n
-				データ数の取得機能のテストです。\n
-				要素をポップした後の戻り値を確認しています。\n
-				データ数が0であれば成功です。\n
-*//***********************************************************************************/
 
-TEST(TestStackSize, AfterPop)
+//イテレータをリストの先頭に向かって一つ進める
+
+//リストの参照がない状態で呼び出した際の挙動
+TEST(TestIteratorDecrement, NoReferences)
 {
-	Stack<int>stack;
-	int temp;
-	ASSERT_TRUE(stack.push(0));
-	ASSERT_TRUE(stack.pop(temp));
-	EXPECT_EQ(0, stack.size());
+#ifdef _DEBUG
+	List<Grades>::Iterator it;
+	EXPECT_DEATH(--it, ".*");
+#endif
 }
 
-//ID:スタック-3 「要素のプッシュに失敗した後のデータ数の取得テスト」については
-//プッシュはメモリーアロケーションエラー以外で失敗する可能性がないのでスキップする
-
-/**********************************************************************************//**
-	@brief		プッシュを2回行った後のデータ数の取得テスト
-	@details	ID:スタック-4\n
-				データ数の取得機能のテストです。\n
-				プッシュを2回行った後の戻り値を確認しています。\n
-				データ数が2であれば成功です。\n
-*//***********************************************************************************/
-TEST(TestStackSize, After2Push)
+//リストが空の際の、末尾イテレータに対して呼び出した際の挙動
+TEST(TestIteratorDecrement, EndIteratorWhenEmpty)
 {
-	Stack<int>stack;
-	ASSERT_TRUE(stack.push(0));
-	ASSERT_TRUE(stack.push(1));
-	EXPECT_EQ(2, stack.size());
+#ifdef _DEBUG
+	List<Grades> list;
+	auto it = list.end();
+	EXPECT_DEATH(--it, ".*");
+#endif
 }
 
-/**********************************************************************************//**
-	@brief		プッシュを2回行った後、１回ポップした後のデータ数の取得テスト
-	@details	ID:スタック-5\n
-				データ数の取得機能のテストです。\n
-				プッシュを2回行った後、１回ポップした後の戻り値を確認しています。\n
-				データ数が1であれば成功です。\n
-*//***********************************************************************************/
-TEST(TestStackSize, After2Push1Pop)
+//先頭イテレータに対して呼び出した際の挙動
+TEST(TestIteratorDecrement, BeginIterator)
 {
-	Stack<int>stack;
-	int temp;
-	ASSERT_TRUE(stack.push(0));
-	ASSERT_TRUE(stack.push(1));
-	ASSERT_TRUE(stack.pop(temp));
-	EXPECT_EQ(1, stack.size());
+#ifdef _DEBUG
+	List<Grades> list;
+	list.add(Grades{ 0,"hoge" });
+	list.add(Grades{ 1,"fuga" });
+	auto it = list.begin();
+	EXPECT_DEATH(--it, ".*");
+#endif
 }
 
-/**********************************************************************************//**
-	@brief		リストが空である場合に、ポップを行った後のデータ数の取得テスト
-	@details	ID:スタック-6\n
-				データ数の取得機能のテストです。\n
-				リストが空である場合に、ポップを行った後の戻り値を確認しています。\n
-				データ数が0であれば成功です。\n
-*//***********************************************************************************/
-TEST(TestStackSize, AfterPopFromEmpty)
+//リストに二つ以上の要素がある場合に呼び出した際の挙動
+TEST(TestIteratorDecrement, MultipleElements)
 {
-	Stack<int>stack;
-	int temp;
-	ASSERT_FALSE(stack.pop(temp));
-	EXPECT_EQ(0, stack.size());
-}
+	List<Grades> list;
+	list.add({ 0,"hoge" });
+	list.add({ 1,"fuga" });
+	list.add({ 2,"piyo" });
 
-//====================================== プッシュ ======================================
+	std::vector<Grades>ans{ Grades{ 2,"piyo" },Grades{ 1,"fuga" },Grades{ 0,"hoge" } };
 
-/**********************************************************************************//**
-	@brief		リストが空である場合に、プッシュした際のプッシュの挙動テスト
-	@details	ID:スタック-8\n
-				プッシュ機能のテストです。\n
-				リストが空である場合に、プッシュした際のプッシュの戻り値と\n
-				プッシュ後のスタックの内容を確認しています。\n
-				戻り値がTRUEでスタックの内容が正しければ成功です。\n
-*//***********************************************************************************/
+	auto it = list.end();
 
-TEST(TestStackPush, Empty)
-{
-	Stack<int>stack;
-	EXPECT_TRUE(stack.push(0));
-	CheckValue({0}, stack);
-}
-
-/**********************************************************************************//**
-	@brief		リストに複数の要素がある場合に、プッシュした際のプッシュの挙動テスト
-	@details	ID:スタック-9\n
-				プッシュ機能のテストです。\n
-				リストに複数の要素がある場合に、プッシュした際のプッシュの戻り値と\n
-				プッシュ後のスタックの内容を確認しています。\n
-				戻り値がTRUEでスタックの内容が正しければ成功です。\n
-*//***********************************************************************************/
-TEST(TestStackPush, MultipleElements)
-{
-	Stack<int>stack;
-	EXPECT_TRUE(stack.push(0));
-	EXPECT_TRUE(stack.push(1));
-	EXPECT_TRUE(stack.push(2));
-	CheckValue({ 2,1,0 }, stack);
-}
-
-//======================================= ポップ =======================================
-
-/**********************************************************************************//**
-	@brief		リストが空である場合に、ポップしたした際のポップの挙動テスト
-	@details	ID:スタック-11\n
-				ポップ機能のテストです。\n
-				リストが空である場合に、ポップしたした際のポップの戻り値と\n
-				ポップ後のスタックの内容を確認しています。\n
-				戻り値がFALSEでスタックの内容が正しければ成功です。\n
-*//***********************************************************************************/
-TEST(TestStackPop, Empty)
-{
-	Stack<int>stack;
-	int temp;
-	EXPECT_FALSE(stack.pop(temp));
-	CheckValue({}, stack);
-}
-
-/**********************************************************************************//**
-	@brief		リストに複数の要素がある場合に、ポップした際のポップの挙動テスト
-	@details	ID:スタック-12\n
-				ポップ機能のテストです。\n
-				リストに複数の要素がある場合に、ポップした際のポップの戻り値と\n
-				ポップ後のスタックの内容、取得した値の内容を確認しています。\n
-				戻り値がTRUEでスタックの内容、取得した内容が正しければ成功です。\n
-*//***********************************************************************************/
-TEST(TestStackPop, MultipleElements)
-{
-	Stack<int>stack;
-	ASSERT_TRUE(stack.push(0));
-	ASSERT_TRUE(stack.push(1));
-	ASSERT_TRUE(stack.push(2));
-	int temp;
-	EXPECT_TRUE(stack.pop(temp));
-	EXPECT_EQ(2,temp);
-	CheckValue({1,0}, stack);
-}
-
-/**********************************************************************************//**
-	@brief		リストに複数の要素がある場合に、複数回ポップした際のポップの挙動テスト
-	@details	ID:スタック-13\n
-				ポップ機能のテストです。\n
-				リストに複数の要素がある場合に、複数回ポップした際のポップの戻り値と\n
-				ポップ後のスタックの内容、取得した値の内容を確認しています。\n
-				戻り値がTRUEでスタックの内容、取得した内容が正しければ成功です。\n
-*//***********************************************************************************/
-TEST(TestStackPop, PopMultipleTimes)
-{
-	constexpr size_t num = 3;
-
-	Stack<int>stack;
-	for (size_t i = 0; i < num; ++i)
+	for (size_t i = 0; i < list.size(); ++i)
 	{
-		ASSERT_TRUE(stack.push(i));
+		--it;
+		EXPECT_TRUE((*it == ans[i]));
 	}
 
-	for (size_t i = 0; i < num; ++i)
-	{
-		int temp;
-		EXPECT_TRUE(stack.pop(temp));
-		EXPECT_EQ(num-1-i,temp);
-	}
-
-	CheckValue({}, stack);
 }
 
-
-
-//==================================== キュー構造 ====================================
-
-//=================================== データ数の取得 ===================================
-
-/**********************************************************************************//**
-	@brief		リストが空である場合のデータ数の取得テスト
-	@details	ID:キュー-0\n
-				データ数の取得機能のテストです。\n
-				リストが空である場合の戻り値を確認しています。\n
-				データ数が0であれば成功です。\n
-*//***********************************************************************************/
-
-TEST(TestQueueSize, Empty)
+//前置デクリメントを行った際の挙動( --演算子オーバーロードで実装した場合)
+TEST(TestIteratorDecrement, PrefixDecrement)
 {
-	Queue<int>queue;
-	EXPECT_EQ(0, queue.size());
+	List<Grades> list;
+	list.add({ 0,"hoge" });
+	list.add({ 1,"fuga" });
+
+	auto it = list.end();
+	EXPECT_TRUE((*(--it) == Grades{ 1,"fuga" }));
+	EXPECT_TRUE((*it == Grades{ 1,"fuga" }));
 }
 
-/**********************************************************************************//**
-	@brief		要素をプッシュした後のデータ数の取得テスト
-	@details	ID:キュー-1\n
-				データ数の取得機能のテストです。\n
-				要素をプッシュした後の戻り値を確認しています。\n
-				データ数が1であれば成功です。\n
-*//***********************************************************************************/
-
-TEST(TestQueueSize, AfterPush)
+//後置デクリメントを行った際の挙動( --演算子オーバーロードで実装した場合 )
+TEST(TestIteratorDecrement, PostfixDecrement)
 {
-	Queue<int>queue;
-	ASSERT_TRUE(queue.push(0));
-	EXPECT_EQ(1, queue.size());
+	List<Grades> list;
+	list.add({ 0,"hoge" });
+	list.add({ 1,"fuga" });
+
+	auto it = list.end();
+	it--;
+	EXPECT_TRUE(((*(it--)) == Grades{ 1,"fuga" }));
+	EXPECT_TRUE(((*it) == Grades{ 0,"hoge" }));
 }
 
-/**********************************************************************************//**
-	@brief		要素をポップした後のデータ数の取得テスト
-	@details	ID:キュー-2\n
-				データ数の取得機能のテストです。\n
-				要素をポップした後の戻り値を確認しています。\n
-				データ数が0であれば成功です。\n
-*//***********************************************************************************/
 
-TEST(TestQueueSize, AfterPop)
+
+//イテレータのコピーを行う
+
+
+//コピーコンストラクト後の値がコピー元と等しいことをチェック
+TEST(TestIteratorCopy, CheckCopy)
 {
-	Queue<int>queue;
-	int temp;
-	ASSERT_TRUE(queue.push(0));
-	ASSERT_TRUE(queue.pop(temp));
-	EXPECT_EQ(0, queue.size());
+	List<Grades> list;
+	list.add({ 0,"hoge" });
+
+	auto it = list.begin();
+
+	auto itCopy = it;
+
+	EXPECT_TRUE(itCopy == it);
 }
 
-//ID:キュー-3 「要素のプッシュに失敗した後のデータ数の取得テスト」については
-//プッシュはメモリーアロケーションエラー以外で失敗する可能性がないのでスキップする
+//イテレータの代入を行う
 
-/**********************************************************************************//**
-	@brief		プッシュを2回行った後のデータ数の取得テスト
-	@details	ID:キュー-4\n
-				データ数の取得機能のテストです。\n
-				プッシュを2回行った後の戻り値を確認しています。\n
-				データ数が2であれば成功です。\n
-*//***********************************************************************************/
-TEST(TestQueueSize, After2Push)
+//代入後の値がコピー元と等しいことをチェック
+TEST(TestIteratorAssign, CheckAssign)
 {
-	Queue<int>queue;
-	ASSERT_TRUE(queue.push(0));
-	ASSERT_TRUE(queue.push(1));
-	EXPECT_EQ(2, queue.size());
+	List<Grades> list;
+	list.add({ 0,"hoge" });
+
+	auto it = list.begin();
+	List<Grades>::Iterator itCopy;
+	itCopy = it;
+
+	EXPECT_TRUE(itCopy == it);
 }
 
-/**********************************************************************************//**
-	@brief		プッシュを2回行った後、１回ポップした後のデータ数の取得テスト
-	@details	ID:キュー-5\n
-				データ数の取得機能のテストです。\n
-				プッシュを2回行った後、１回ポップした後の戻り値を確認しています。\n
-				データ数が1であれば成功です。\n
-*//***********************************************************************************/
-TEST(TestQueueSize, After2Push1Pop)
+//二つのイテレータが同一のものであるか、比較を行う
+
+
+//リストが空の状態での先頭イテレータと末尾イテレータを比較した際の挙動をチェック
+TEST(TestIteratorEqual, CompareBeginAndEndWhenEmpty)
 {
-	Queue<int>queue;
-	int temp;
-	ASSERT_TRUE(queue.push(0));
-	ASSERT_TRUE(queue.push(1));
-	ASSERT_TRUE(queue.pop(temp));
-	EXPECT_EQ(1, queue.size());
+	List<Grades> list;
+	EXPECT_TRUE(list.begin() == list.end());
 }
 
-/**********************************************************************************//**
-	@brief		リストが空である場合に、ポップを行った後のデータ数の取得テスト
-	@details	ID:キュー-6\n
-				データ数の取得機能のテストです。\n
-				リストが空である場合に、ポップを行った後の戻り値を確認しています。\n
-				データ数が0であれば成功です。\n
-*//***********************************************************************************/
-TEST(TestQueueSize, AfterPopFromEmpty)
+//同一のイテレータを比較した際の挙動
+TEST(TestIteratorEqual, CompareSame)
 {
-	Queue<int>queue;
-	int temp;
-	ASSERT_FALSE(queue.pop(temp));
-	EXPECT_EQ(0, queue.size());
+	List<Grades> list;
+	list.add({ 0,"hoge" });
+	EXPECT_TRUE(list.begin() == list.begin());
 }
 
-//====================================== プッシュ ======================================
-
-/**********************************************************************************//**
-	@brief		リストが空である場合に、プッシュした際のプッシュの挙動テスト
-	@details	ID:キュー-8\n
-				プッシュ機能のテストです。\n
-				リストが空である場合に、プッシュした際のプッシュの戻り値と\n
-				プッシュ後のキューの内容を確認しています。\n
-				戻り値がTRUEでキューの内容が正しければ成功です。\n
-*//***********************************************************************************/
-
-TEST(TestQueuePush, Empty)
+//異なるイテレータを比較した際の挙動
+TEST(TestIteratorEqual, CompareNotSame)
 {
-	Queue<int>queue;
-	EXPECT_TRUE(queue.push(0));
-	CheckValue({ 0 }, queue);
+	List<Grades> list;
+	list.add({ 0,"hoge" });
+	list.add({ 1,"fuga" });
+
+	auto it = list.begin();
+	auto itA = it;
+	auto itB = ++it;
+	EXPECT_FALSE(itA == itB);
 }
 
-/**********************************************************************************//**
-	@brief		リストに複数の要素がある場合に、プッシュした際のプッシュの挙動テスト
-	@details	ID:キュー-9\n
-				プッシュ機能のテストです。\n
-				リストに複数の要素がある場合に、プッシュした際のプッシュの戻り値と\n
-				プッシュ後のキューの内容を確認しています。\n
-				戻り値がTRUEでキューの内容が正しければ成功です。\n
-*//***********************************************************************************/
-TEST(TestQueuePush, MultipleElements)
+
+
+//二つのイテレータが異なるものであるか、比較を行う
+
+
+//リストが空の状態での先頭イテレータと末尾イテレータを比較した際の挙動をチェック
+TEST(TestIteratorNotEqual, CompareBeginAndEndWhenEmpty)
 {
-	Queue<int>queue;
-	EXPECT_TRUE(queue.push(0));
-	EXPECT_TRUE(queue.push(1));
-	EXPECT_TRUE(queue.push(2));
-	CheckValue({ 2,1,0 }, queue);
+	List<Grades> list;
+	EXPECT_FALSE(list.begin() != list.end());
 }
 
-//======================================= ポップ =======================================
-
-/**********************************************************************************//**
-	@brief		リストが空である場合に、ポップしたした際のポップの挙動テスト
-	@details	ID:キュー-11\n
-				ポップ機能のテストです。\n
-				リストが空である場合に、ポップしたした際のポップの戻り値と\n
-				ポップ後のキューの内容を確認しています。\n
-				戻り値がFALSEでキューの内容が正しければ成功です。\n
-*//***********************************************************************************/
-TEST(TestQueuePop, Empty)
+//同一のイテレータを比較した際の挙動
+TEST(TestIteratorNotEqual, CompareSame)
 {
-	Queue<int>queue;
-	int temp;
-	EXPECT_FALSE(queue.pop(temp));
-	CheckValue({}, queue);
+	List<Grades> list;
+	list.add({ 0,"hoge" });
+	EXPECT_FALSE(list.begin() != list.begin());
 }
 
-/**********************************************************************************//**
-	@brief		リストに複数の要素がある場合に、ポップした際のポップの挙動テスト
-	@details	ID:キュー-12\n
-				ポップ機能のテストです。\n
-				リストに複数の要素がある場合に、ポップした際のポップの戻り値と\n
-				ポップ後のキューの内容、取得した値の内容を確認しています。\n
-				戻り値がTRUEでキューの内容、取得した内容が正しければ成功です。\n
-*//***********************************************************************************/
-TEST(TestQueuePop, MultipleElements)
+//異なるイテレータを比較した際の挙動
+TEST(TestIteratorNotEqual, CompareNotSame)
 {
-	Queue<int>queue;
-	ASSERT_TRUE(queue.push(0));
-	ASSERT_TRUE(queue.push(1));
-	ASSERT_TRUE(queue.push(2));
-	int temp;
-	EXPECT_TRUE(queue.pop(temp));
-	EXPECT_EQ(0, temp);
-	CheckValue({ 2,1 }, queue);
+	List<Grades> list;
+	list.add({ 0,"hoge" });
+	list.add({ 1,"fuga" });
+
+	auto it = list.begin();
+	auto itA = it;
+	auto itB = ++it;
+	EXPECT_TRUE(itA != itB);
 }
 
-/**********************************************************************************//**
-	@brief		リストに複数の要素がある場合に、複数回ポップした際のポップの挙動テスト
-	@details	ID:キュー-13\n
-				ポップ機能のテストです。\n
-				リストに複数の要素がある場合に、複数回ポップした際のポップの戻り値と\n
-				ポップ後のキューの内容、取得した値の内容を確認しています。\n
-				戻り値がTRUEでキューの内容、取得した内容が正しければ成功です。\n
-*//***********************************************************************************/
-TEST(TestQueuePop, PopMultipleTimes)
+
+
+//コンストイテレーターのテスト
+
+//イテレータの指す要素を取得する
+
+//リストの参照がない状態で呼び出した際の挙動
+TEST(TestConstIteratorGetElement, NoReferences)
 {
-	constexpr size_t num = 3;
-
-	Queue<int>queue;
-	for (size_t i = 0; i < num; ++i)
-	{
-		ASSERT_TRUE(queue.push(i));
-	}
-
-	for (size_t i = 0; i < num; ++i)
-	{
-		int temp;
-		EXPECT_TRUE(queue.pop(temp));
-		EXPECT_EQ(i, temp);
-	}
-
-	CheckValue({}, queue);
+#ifdef _DEBUG
+	List<Grades>::ConstIterator it;
+	EXPECT_DEATH((*it).score, ".*");
+#endif
 }
 
+//リストが空の際の、先頭イテレータに対して呼び出した際の挙動
+TEST(TestConstIteratorGetElement, BeginIteratorWhenEmpty)
+{
+#ifdef _DEBUG
+	List<Grades> list;
+	EXPECT_DEATH((*list.constBegin()).score, ".*");
+#endif
+}
+
+//末尾イテレータに対して呼び出した際の挙動
+TEST(TestConstIteratorGetElement, EndIterator)
+{
+#ifdef _DEBUG
+	List<Grades> list;
+	list.add(Grades{ 0,"hoge" });
+	list.add(Grades{ 1,"fuga" });
+	EXPECT_DEATH((*list.constEnd()).score, ".*");
+#endif
+}
+
+
+//イテレータをリストの末尾に向かって一つ進める
+
+
+//リストの参照がない状態で呼び出した際の挙動
+TEST(TestConstIteratorIncrement, NoReferences)
+{
+#ifdef _DEBUG
+	List<Grades>::ConstIterator it;
+	EXPECT_DEATH(++it, ".*");
+#endif
+}
+
+//リストが空の際の、先頭イテレータに対して呼び出した際の挙動
+TEST(TestConstIteratorIncrement, BeingIteratorWhenEmpty)
+{
+#ifdef _DEBUG
+	List<Grades> list;
+	auto it = list.constBegin();
+	EXPECT_DEATH(++it, ".*");
+#endif
+}
+
+//末尾イテレータに対して呼び出した際の挙動
+TEST(TestConstIteratorIncrement, EndIterator)
+{
+#ifdef _DEBUG
+	List<Grades> list;
+	list.add(Grades{ 0,"hoge" });
+	list.add(Grades{ 1,"fuga" });
+	auto it = list.constEnd();
+	EXPECT_DEATH(++it, ".*");
+#endif
+}
+
+
+
+//リストに二つ以上の要素がある場合に呼び出した際の挙動
+TEST(TestConstIteratorIncrement, MultipleElements)
+{
+	List<Grades> list;
+	list.add({ 0,"hoge" });
+	list.add({ 1,"fuga" });
+
+	auto it = list.constBegin();
+	++it;
+	EXPECT_TRUE((*it == Grades{ 1,"fuga" }));
+}
+
+//前置インクリメントを行った際の挙動(++演算子オーバーロードで実装した場合)
+TEST(TestConstIteratorIncrement, PrefixIncrement)
+{
+	List<Grades> list;
+	list.add({ 0,"hoge" });
+	list.add({ 1,"fuga" });
+
+	auto it = list.constBegin();
+	EXPECT_TRUE((*(++it) == Grades{ 1,"fuga" }));
+	EXPECT_TRUE((*it == Grades{ 1,"fuga" }));
+}
+
+////後置インクリメントを行った際の挙動( ++演算子オーバーロードで実装した場合 )
+TEST(TestConstIteratorIncrement, PostfixIncrement)
+{
+	List<Grades> list;
+	list.add({ 0,"hoge" });
+	list.add({ 1,"fuga" });
+
+	auto it = list.constBegin();
+	EXPECT_TRUE((*(it++) == Grades{ 0,"hoge" }));
+	EXPECT_TRUE((*it == Grades{ 1,"fuga" }));
+}
+
+
+//イテレータをリストの先頭に向かって一つ進める
+
+//リストの参照がない状態で呼び出した際の挙動
+TEST(TestConstIteratorDecrement, NoReferences)
+{
+#ifdef _DEBUG
+	List<Grades>::ConstIterator it;
+	EXPECT_DEATH(--it, ".*");
+#endif
+}
+
+//リストが空の際の、先頭イテレータに対して呼び出した際の挙動
+TEST(TestConstIteratorDecrement, BeingIteratorWhenEmpty)
+{
+#ifdef _DEBUG
+	List<Grades> list;
+	auto it = list.constEnd();
+	EXPECT_DEATH(--it, ".*");
+#endif
+}
+
+//先頭イテレータに対して呼び出した際の挙動
+TEST(TestConstIteratorDecrement, BeingIterator)
+{
+#ifdef _DEBUG
+	List<Grades> list;
+	list.add(Grades{ 0,"hoge" });
+	list.add(Grades{ 1,"fuga" });
+	auto it = list.constBegin();
+	EXPECT_DEATH(--it, ".*");
+#endif
+}
+
+//リストに二つ以上の要素がある場合に呼び出した際の挙動
+TEST(TestConstIteratorDecrement, MultipleElements)
+{
+	List<Grades> list;
+	list.add({ 0,"hoge" });
+	list.add({ 1,"fuga" });
+
+	auto it = list.constEnd();
+	--it;
+	EXPECT_TRUE((*it == Grades{ 1,"fuga" }));
+}
+
+//前置デクリメントを行った際の挙動( --演算子オーバーロードで実装した場合)
+TEST(TestConstIteratorDecrement, PrefixDecrement)
+{
+	List<Grades> list;
+	list.add({ 0,"hoge" });
+	list.add({ 1,"fuga" });
+
+	auto it = list.constEnd();
+	EXPECT_TRUE((*(--it) == Grades{ 1,"fuga" }));
+	EXPECT_TRUE((*it == Grades{ 1,"fuga" }));
+}
+
+////後置デクリメントを行った際の挙動( --演算子オーバーロードで実装した場合 )
+TEST(TestConstIteratorDecrement, PostfixDecrement)
+{
+	List<Grades> list;
+	list.add({ 0,"hoge" });
+	list.add({ 1,"fuga" });
+
+	auto it = list.constEnd();
+	it--;
+	EXPECT_TRUE(((*(it--)) == Grades{ 1,"fuga" }));
+	EXPECT_TRUE(((*it) == Grades{ 0,"hoge" }));
+}
+
+
+
+
+//イテレータのコピーを行う
+
+//コピーコンストラクト後の値がコピー元と等しいことをチェック
+TEST(TestConstIteratorCopy, CheckCopy)
+{
+	List<Grades> list;
+	list.add({ 0,"hoge" });
+
+	auto it = list.constBegin();
+
+	auto itCopy = it;
+
+	EXPECT_TRUE(itCopy == it);
+}
+
+
+//イテレータの代入を行う
+
+//代入後の値がコピー元と等しいことをチェック
+TEST(TestConstIteratorAssign, CheckAssign)
+{
+	List<Grades> list;
+	list.add({ 0,"hoge" });
+
+	auto it = list.constBegin();
+	List<Grades>::ConstIterator itCopy;
+	itCopy = it;
+
+	EXPECT_TRUE(itCopy == it);
+}
+
+
+//二つのイテレータが同一のものであるか、比較を行う
+
+
+//リストが空の状態での先頭イテレータと末尾イテレータを比較した際の挙動をチェック
+TEST(TestConstIteratorEqual, CompareBeginAndEndWhenEmpty)
+{
+	List<Grades> list;
+	EXPECT_TRUE(list.constBegin() == list.constEnd());
+}
+
+//同一のイテレータを比較した際の挙動
+TEST(TestConstIteratorEqual, CompareSame)
+{
+	List<Grades> list;
+	list.add({ 0,"hoge" });
+	EXPECT_TRUE(list.constBegin() == list.constBegin());
+}
+
+//異なるイテレータを比較した際の挙動
+TEST(TestConstIteratorEqual, CompareNotSame)
+{
+	List<Grades> list;
+	list.add({ 0,"hoge" });
+	list.add({ 1,"fuga" });
+
+	auto it = list.constBegin();
+	auto itA = it;
+	auto itB = ++it;
+	EXPECT_FALSE(itA == itB);
+}
+
+
+
+//二つのイテレータが異なるものであるか、比較を行う
+
+
+//リストが空の状態での先頭イテレータと末尾イテレータを比較した際の挙動をチェック
+TEST(TestConstIteratorNotEqual, CompareBeginAndEndWhenEmpty)
+{
+	List<Grades> list;
+	EXPECT_FALSE(list.constBegin() != list.constEnd());
+}
+
+//同一のイテレータを比較した際の挙動
+TEST(TestConstIteratorNotEqual, CompareSame)
+{
+	List<Grades> list;
+	list.add({ 0,"hoge" });
+	EXPECT_FALSE(list.constBegin() != list.constBegin());
+}
+
+//異なるイテレータを比較した際の挙動
+TEST(TestConstIteratorNotEqual, CompareNotSame)
+{
+	List<Grades> list;
+	list.add({ 0,"hoge" });
+	list.add({ 1,"fuga" });
+
+	auto it = list.constBegin();
+	auto itA = it;
+	auto itB = ++it;
+	EXPECT_TRUE(itA != itB);
+}
